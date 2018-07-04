@@ -14,9 +14,6 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializer;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
 
-import java.util.HashSet;
-import java.util.Set;
-
 /**
  * @author fengqian
  * @since <pre>2018/07/04</pre>
@@ -28,10 +25,13 @@ public class RedisConfig {
     private String host;
     @Value("${spring.redis.port}")
     private int port;
-    @Value("${spring.redis.jedis.pool.max-wait}")
-    private int maxWaitMillis;
 
 
+    /**
+     * 如果只使用注解则不需要配置该bean
+     * @param jedisConnectionFactory
+     * @return
+     */
     @Bean
     public RedisTemplate initRedisTemplate(@Qualifier("connectionFactory") JedisConnectionFactory jedisConnectionFactory) {
 
@@ -56,14 +56,10 @@ public class RedisConfig {
 
     @Bean
     public CacheManager init(@Qualifier("connectionFactory") JedisConnectionFactory jedisConnectionFactory){
-        Set<String> caches = new HashSet<>();
-        caches.add("user");
+        // redis2.x以后，cacheManager 不再需要RedisTemplate来创建了
         RedisCacheManager cacheManager = RedisCacheManager.builder(jedisConnectionFactory)
-                .initialCacheNames(caches)
                 .build();
         cacheManager.initializeCaches();
         return cacheManager;
     }
-
-
 }
